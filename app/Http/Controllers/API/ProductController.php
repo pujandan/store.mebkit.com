@@ -12,13 +12,9 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $id = $request->input('id');
-        $limit = $request->input('limit', 10);
-        $name = $request->input('name');
-        $description = $request->input('description');
-        $tags = $request->input('tags');
-        $categories = $request->input('categories');
-        $price_from = $request->input('price_from');
-        $price_to = $request->input('price_to');
+        $size = $request->input('size', 10);
+        $page = $request->input('page', 1);
+        $filter = request(['filter.search', 'filter.price_from', 'filter.price_to']);
 
         // find by id
         if ($id) {
@@ -31,37 +27,10 @@ class ProductController extends Controller
             }
         }
 
-        $product = Product::with('category', 'galleries');
+        $product = Product::with('category', 'galleries')
+            ->filter($filter)
+            ->paginate($size, ['*'], 'page', $page);
 
-        if ($name) {
-            $product->where('name', 'like', '%' . $name . '%');
-        }
-
-        if ($description) {
-            $product->where('description', 'like', '%' . $description . '%');
-        }
-
-        if ($tags) {
-            $product->where('tags', 'like', '%' . $tags . '%');
-        }
-
-        if ($price_from) {
-            $product->where('price', '>=', $price_from);
-        }
-
-        if ($price_to) {
-            $product->where('price', '<=', $price_to);
-        }
-
-        if ($categories) {
-            $product->where('categories',  $categories);
-        }
-
-        return ResponseFormatter::success($product->paginate($limit), "data product berhasil diambil");
-    }
-
-
-    public function create()
-    {
+        return ResponseFormatter::success($product, trans('message.show_success'));
     }
 }
