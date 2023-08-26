@@ -13,11 +13,11 @@ return [
     |
     */
 
-    'welcome' => 'selamat datang diaplikasi!',
+    'welcome' => 'Selamat datang diaplikasi!',
 
-    'saved' => 'data berhasil disimpan',
-    'deleted' => 'data berhasil dihapus',
-    'updated' => 'data berhasil diubah',
+    'saved' => 'Data berhasil disimpan',
+    'deleted' => 'Data berhasil dihapus',
+    'updated' => 'Data berhasil diubah',
 
     'login_success' => 'Login berhasil',
     'login_failed' => 'Email atau Password yang ada masukan salah',

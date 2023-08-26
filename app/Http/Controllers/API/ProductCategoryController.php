@@ -10,34 +10,40 @@ use Illuminate\Http\Request;
 class ProductCategoryController extends Controller
 {
 
-    public function all(Request $request)
+    public function index(Request $request)
     {
-        $id = $request->input('id');
-        $limit = $request->input('limit');
-        $name = $request->input('name');
-        $show_product = $request->input('show_product');
+        try {
 
-        // find by id
-        if ($id) {
-            $categories = ProductCategory::find($id);
+            $id = $request->input('id');
+            $page = $request->input('page', 1);
+            $size = $request->input('size', 10);
+            $name = $request->input('filter.name');
+            $show_product = $request->input('show.product');
 
-            if ($categories) {
-                return ResponseFormatter::success($categories, "data kategori berhasil diambil");
-            } else {
-                return ResponseFormatter::error("kategori tidak ditemukan", 404);
+            // find by id
+            if ($id) {
+                $categories = ($show_product) ? ProductCategory::with('products')->find($id) : ProductCategory::find($id);
+
+                if ($categories) {
+                    return ResponseFormatter::success($categories, trans('message.show_success'));
+                } else {
+                    return ResponseFormatter::error(trans('message.show_failed'));
+                }
             }
+
+            $categories = ($show_product) ? ProductCategory::with('products') : ProductCategory::query();
+
+            // search name
+            if ($name) {
+                $categories->where('name', 'like', '%' . $name . '%');
+            }
+
+            // pagination
+            $categories = $categories->paginate($size, ['*'], 'page', $page);
+
+            return ResponseFormatter::success($categories, trans('message.show_success'));
+        } catch (\Exception $e) {
+            return ResponseFormatter::exception($e);
         }
-
-        $categories = ProductCategory::query();
-
-        if ($name) {
-            $categories->where('name', 'like', '%' . $name . '%');
-        }
-
-        if ($show_product) {
-            $categories->with('products');
-        }
-
-        return ResponseFormatter::success($categories->paginate($limit), "data kategori berhasil diambil");
     }
 }

@@ -9,10 +9,10 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function all(Request $request)
+    public function index(Request $request)
     {
         $id = $request->input('id');
-        $limit = $request->input('limit');
+        $limit = $request->input('limit', 10);
         $name = $request->input('name');
         $description = $request->input('description');
         $tags = $request->input('tags');

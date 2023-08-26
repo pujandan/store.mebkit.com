@@ -18,14 +18,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('products', [ProductController::class, 'all']);
+Route::get('products', [ProductController::class, 'index']);
 Route::post('products', [ProductController::class, 'create']);
-Route::get('categories', [ProductCategoryController::class, 'all']);
+
+
+Route::get('categories', [ProductCategoryController::class, 'index']);
 
 
 Route::get('register', [UserController::class, 'register']);
 Route::get('login', [UserController::class, 'login']);
-
 
 Route::middleware('auth:sanctum')->group(function () {
 
