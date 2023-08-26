@@ -24,7 +24,7 @@ class ProductCategoryController extends Controller
             if ($categories) {
                 return ResponseFormatter::success($categories, "data kategori berhasil diambil");
             } else {
-                return ResponseFormatter::error(null, "data kategori tidak tersedia", 400);
+                return ResponseFormatter::error("kategori tidak ditemukan", 404);
             }
         }
 

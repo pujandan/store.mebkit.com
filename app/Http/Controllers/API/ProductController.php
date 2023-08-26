@@ -27,7 +27,7 @@ class ProductController extends Controller
             if ($product) {
                 return ResponseFormatter::success($product, "data product berhasil diambil");
             } else {
-                return ResponseFormatter::error(null, "data product tidak tersedia", 400);
+                return ResponseFormatter::error("produk tidak ditemukan", 404);
             }
         }
 
@@ -58,5 +58,10 @@ class ProductController extends Controller
         }
 
         return ResponseFormatter::success($product->paginate($limit), "data product berhasil diambil");
+    }
+
+
+    public function create()
+    {
     }
 }

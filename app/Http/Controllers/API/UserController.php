@@ -12,11 +12,41 @@ use Laravel\Fortify\Rules\Password;
 
 class UserController extends Controller
 {
+    public function login(Request $request)
+    {
+        try {
+            $request->validate([
+                'email' => 'required|email',
+                'password' => 'required'
+            ]);
+
+            $credentials = request(['email', 'password']);
+            if (!Auth::attempt($credentials)) {
+                throw new \Exception(trans('message.login_failed'), 401);
+            }
+
+            $user = User::where('email', $request->email)->first();
+            if (!Hash::check($request->password, $user->password, [])) {
+                throw new \Exception(trans('message.login_failed'), 401);
+            }
+
+            $tokenResult = $user->createToken('authToken')->plainTextToken;
+            return ResponseFormatter::success(
+                [
+                    'access_token' => $tokenResult,
+                    'token_type' => 'Bearer',
+                    'user' => $user,
+                ],
+                trans('message.login_success')
+            );
+        } catch (\Exception $e) {
+            return ResponseFormatter::exception($e);
+        }
+    }
 
     public function register(Request $request)
     {
         try {
-
             $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|max:255|email|unique:users,email',
@@ -41,96 +71,77 @@ class UserController extends Controller
                     'token_type' => 'Bearer',
                     'user' => $user,
                 ],
-                'User registered'
+                trans('message.register_success')
             );
-        } catch (\Exception $error) {
-
-            return ResponseFormatter::error([
-                'message' => 'something went wrong',
-                'error' => $error->getMessage(),
-            ], 'Authentication failed', 422);
+        } catch (\Exception $e) {
+            return ResponseFormatter::exception($e);
         }
     }
 
-    public function login(Request $request)
+
+    public function show(Request $request)
     {
         try {
-            $request->validate([
-                'email' => 'required|email',
-                'password' => 'required'
-            ]);
-
-            $credentials = request(['email', 'password']);
-            if (!Auth::attempt($credentials)) {
-                throw new \Exception('Authentication Failed');
-            }
-
-            $user = User::where('email', $request->email)->first();
-
-            if (!Hash::check($request->password, $user->password, [])) {
-                throw new \Exception('Invalid Credentials');
-            }
-
-            $tokenResult = $user->createToken('authToken')->plainTextToken;
-
-            return ResponseFormatter::success(
-                [
-                    'access_token' => $tokenResult,
-                    'token_type' => 'Bearer',
-                    'user' => $user,
-                ],
-                'Authenticated'
-            );
-        } catch (\Exception $error) {
-            return ResponseFormatter::error([
-                'message' => 'something went wrong',
-                'error' => $error->getMessage(),
-            ], 'Authentication failed', 422);
+            return ResponseFormatter::success($request->user(), trans('message.show_success'));
+        } catch (\Exception $e) {
+            return ResponseFormatter::exception($e);
         }
-    }
-
-    public function fetch(Request $request)
-    {
-        return ResponseFormatter::success($request->user(), "data profile berhasil di ambil");
     }
 
     public function update(Request $request)
     {
         try {
 
-            $request->validate([
+            $rules = [
                 'name' => 'nullable|string|max:255',
-                'email' => 'nullable|string|max:255|email', // unique:users,email
                 'phone' => 'nullable|string|max:255',
-                'username' => 'nullable|string|max:255', // unique:users,username
-                'password' => ['nullable', 'string', new Password],
-            ]);
+                'username' => 'nullable|string|max:255',
+            ];
 
+            // for changed email
+            if ($request->email != Auth::user()->email) {
+                $rules['email'] = 'nullable|string|max:255|email|unique:users,email';
+            } else {
+                $rules['email'] = 'nullable|string|max:255|email';
+            }
+
+            // for changed username
+            if ($request->username != Auth::user()->username) {
+                $rules['username'] = 'nullable|string|max:255|unique:users,username';
+            } else {
+                $rules['username'] = 'nullable|string|max:255';
+            }
+
+            // for changed password
+            if ($request->password) {
+                $rules['password'] = ['required', 'string', new Password];
+            }
+
+            $request->validate($rules);
             $user = User::find(Auth::user()->id);
+
             $user->update([
                 "name" => $request->name ?? $user->name,
                 "email" => $request->email ?? $user->email,
                 "phone" => $request->phone ?? $user->phone,
                 "username" => $request->username ?? $user->username,
-                // "password" => $request->password ?? $user->password,
+                "password" => ($request->password) ? Hash::make($request->password) : Auth::user()->password,
             ]);
 
-            return ResponseFormatter::success($user, "user berhasil di update");
-        } catch (\Exception $error) {
-            return ResponseFormatter::error([
-                'message' => 'something went wrong',
-                'error' => $error->getMessage(),
-            ], 'Update failed', 422);
+            return ResponseFormatter::success($user, trans('message.updated'));
+        } catch (\Exception $e) {
+            return ResponseFormatter::exception($e);
         }
-
-
-        return ResponseFormatter::success($request->user(), "data profile berhasil di ambil");
     }
 
 
     public function logout(Request $request)
     {
-        $token = $request->user()->currentAccessToken()->delete();
-        return ResponseFormatter::success($token, "Token Revoked");
+        try {
+            $token = $request->user()->currentAccessToken()->delete();
+            return ResponseFormatter::success($token, trans("message.logout_success"));
+        } catch (\Exception $e) {
+            return ResponseFormatter::exception($e);
+        }
     }
 }
