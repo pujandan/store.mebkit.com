@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
 
             $table->string("name");
-            $table->float("price");
+            $table->decimal("price", 11, 0);
             $table->longText("description");
             $table->string("tags")->nullable();
             $table->foreignUuid("category_id");

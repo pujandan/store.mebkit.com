@@ -28,15 +28,14 @@ class Product extends Model
     // scope fillter search
     public function scopeFilter($query, array $filters)
     {
-        $filter = $filters['filter'];
-        $query
-            ->when($filter['price_from'] ?? false, function ($query, $price_from) {
+        return $query
+            ->when($filters['filter']['price_from'] ?? false, function ($query, $price_from) {
                 return $query->where('price', '>=', $price_from);
             })
-            ->when($filter['price_to'] ?? false, function ($query, $price_to) {
+            ->when($filters['filter']['price_to'] ?? false, function ($query, $price_to) {
                 return $query->where('price', '<=', $price_to);
             })
-            ->when($filter['search'] ?? false, function ($query, $search) {
+            ->when($filters['filter']['search'] ?? false, function ($query, $search) {
                 return $query->where(function ($query) use ($search) {
                     return $query->where('name', 'like', "%$search%")
                         ->orWhere('description', 'like', "%$search%")

@@ -18,6 +18,7 @@ return [
     'saved' => 'Data berhasil disimpan',
     'deleted' => 'Data berhasil dihapus',
     'updated' => 'Data berhasil diubah',
+    'empty' => 'Data tidak tersedia',
 
     'login_success' => 'Login berhasil',
     'login_failed' => 'Email atau Password yang ada masukan salah',
@@ -30,6 +31,11 @@ return [
 
     'logout_success' => 'Logout berhasil',
     'logout_failed' => 'Logout gagal',
+
+    'product_empty' => 'produk :name tidak tersedia',
+
+    'transaction_success' => 'Transaksi berhasil',
+    'transaction_failed' => 'Transaksi gagal',
 
 
 

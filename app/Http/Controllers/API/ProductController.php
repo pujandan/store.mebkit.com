@@ -9,17 +9,16 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $id = $request->input('id');
-        $size = $request->input('size', 10);
-        $page = $request->input('page', 1);
+        $id = request('id');
+        $size = request('size', 10);
+        $page = request('page', 1);
         $filter = request(['filter.search', 'filter.price_from', 'filter.price_to']);
 
         // find by id
         if ($id) {
             $product = Product::with('category', 'galleries')->find($id);
-
             if ($product) {
                 return ResponseFormatter::success($product, "data product berhasil diambil");
             } else {

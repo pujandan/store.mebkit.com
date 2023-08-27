@@ -15,8 +15,8 @@ return new class extends Migration
             $table->uuid('id')->primary();
 
             $table->text('address')->nullable();
-            $table->float('price_total')->default(0);
-            $table->float('price_shipping')->default(0);
+            $table->decimal('price_total', 11, 0)->default(0);
+            $table->decimal('price_shipping', 11, 0)->default(0);
             $table->string('payment')->default("MANUAL");
             $table->string('status')->default("PENDING");
 
