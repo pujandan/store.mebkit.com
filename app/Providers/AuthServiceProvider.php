@@ -4,9 +4,11 @@ namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Laravel\Sanctum\HasApiTokens;
 
 class AuthServiceProvider extends ServiceProvider
 {
+    use HasApiTokens;
     /**
      * The model to policy mappings for the application.
      *

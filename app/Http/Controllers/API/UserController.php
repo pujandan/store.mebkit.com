@@ -4,10 +4,12 @@ namespace App\Http\Controllers\API;
 
 use App\Helpers\ResponseFormatter;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Laravel\Fortify\Rules\Password;
 
 class UserController extends Controller
@@ -44,17 +46,9 @@ class UserController extends Controller
         }
     }
 
-    public function register(Request $request)
+    public function register(UserRequest $request)
     {
         try {
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|string|max:255|email|unique:users,email',
-                'phone' => 'nullable|string|max:255',
-                'username' => 'required|string|max:255|unique:users,username',
-                'password' => ['required', 'string', new Password],
-            ]);
-
             $user = User::create([
                 "name" => $request->name,
                 "email" => $request->email,
@@ -64,7 +58,6 @@ class UserController extends Controller
             ]);
 
             $tokenResult = $user->createToken('authToken')->plainTextToken;
-
             return ResponseFormatter::success(
                 [
                     'access_token' => $tokenResult,
@@ -88,38 +81,10 @@ class UserController extends Controller
         }
     }
 
-    public function update(Request $request)
+    public function update(UserRequest $request)
     {
         try {
-
-            $rules = [
-                'name' => 'nullable|string|max:255',
-                'phone' => 'nullable|string|max:255',
-                'username' => 'nullable|string|max:255',
-            ];
-
-            // for changed email
-            if ($request->email != Auth::user()->email) {
-                $rules['email'] = 'nullable|string|max:255|email|unique:users,email';
-            } else {
-                $rules['email'] = 'nullable|string|max:255|email';
-            }
-
-            // for changed username
-            if ($request->username != Auth::user()->username) {
-                $rules['username'] = 'nullable|string|max:255|unique:users,username';
-            } else {
-                $rules['username'] = 'nullable|string|max:255';
-            }
-
-            // for changed password
-            if ($request->password) {
-                $rules['password'] = ['required', 'string', new Password];
-            }
-
-            $request->validate($rules);
             $user = User::find(Auth::user()->id);
-
             $user->update([
                 "name" => $request->name ?? $user->name,
                 "email" => $request->email ?? $user->email,
@@ -127,7 +92,6 @@ class UserController extends Controller
                 "username" => $request->username ?? $user->username,
                 "password" => ($request->password) ? Hash::make($request->password) : Auth::user()->password,
             ]);
-
             return ResponseFormatter::success($user, trans('message.updated'));
         } catch (\Exception $e) {
             return ResponseFormatter::exception($e);
