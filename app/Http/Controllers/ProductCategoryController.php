@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProductCategoryRequest;
 use App\Models\ProductCategory;
 use Illuminate\Http\Request;
+use Yajra\DataTables\DataTables;
 
 class ProductCategoryController extends Controller
 {
@@ -13,7 +14,19 @@ class ProductCategoryController extends Controller
      */
     public function index()
     {
-        //
+        if (request()->ajax()) {
+            $query = ProductCategory::query();
+
+            return DataTables::of($query)
+                ->addColumn('action', function ($item) {
+                    return
+                        '<a href="' . route('dashboard.category.edit', $item->id) . '">Edit</a>';
+                })
+                ->rawColumns(['action'])
+                ->make();
+        }
+
+        return view('pages.dashboard.category.index');
     }
 
     /**
